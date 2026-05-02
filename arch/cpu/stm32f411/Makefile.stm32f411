@@ -1,0 +1,21 @@
+CONTIKI_CPU = $(CONTIKI)/arch/cpu/stm32f411
+
+CONTIKI_CPU_DIRS += . startup
+CONTIKI_CPU_SOURCEFILES += gpio.c clock.c rtimer-arch.c uart0.c
+CONTIKI_CPU_SOURCEFILES += stm32f411_startup.c
+
+CONTIKI_SOURCEFILES += $(CONTIKI_CPU_SOURCEFILES)
+
+CFLAGS += -mcpu=cortex-m4 -mthumb -std=gnu11 -g 
+
+LDSCRIPT = $(CONTIKI_CPU)/ld/stm32f411.ld
+
+
+CFLAGS += -I$(CONTIKI)/arch/cpu/stm32f411/lib/CMSIS/Device/ST/STM32F4xx/Include
+CFLAGS += -I$(CONTIKI)/arch/cpu/stm32f411/lib/CMSIS/Include
+
+
+
+
+
+include $(CONTIKI)/arch/cpu/arm/cortex-m/cm4/Makefile.cm4
