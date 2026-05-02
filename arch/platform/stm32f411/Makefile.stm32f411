@@ -1,0 +1,16 @@
+
+
+
+CPU = stm32f411
+
+CONTIKI_TARGET_DIRS += .
+
+ CONTIKI_TARGET_SOURCEFILES += platform.c
+PROJECT_SOURCEFILES += platform.c
+
+
+
+ CONTIKI_SOURCEFILES += $(CONTIKI_TARGET_SOURCEFILES)
+
+
+include $(CONTIKI)/arch/cpu/$(CPU)/Makefile.$(CPU)
