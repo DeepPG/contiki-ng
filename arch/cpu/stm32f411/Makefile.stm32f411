@@ -1,12 +1,12 @@
 CONTIKI_CPU = $(CONTIKI)/arch/cpu/stm32f411
 
-CONTIKI_CPU_DIRS += . startup
-CONTIKI_CPU_SOURCEFILES += gpio.c clock.c rtimer-arch.c uart0.c
+CONTIKI_CPU_DIRS += . startup dev
+CONTIKI_CPU_SOURCEFILES += gpio.c clock.c rtimer-arch.c uart0.c dbg.c gpio-hal-arch.c
 CONTIKI_CPU_SOURCEFILES += stm32f411_startup.c
 
 CONTIKI_SOURCEFILES += $(CONTIKI_CPU_SOURCEFILES)
 
-CFLAGS += -mcpu=cortex-m4 -mthumb -std=gnu11 -g 
+CFLAGS += -mcpu=cortex-m4 -mthumb -std=gnu11 -g
 
 LDSCRIPT = $(CONTIKI_CPU)/ld/stm32f411.ld
 

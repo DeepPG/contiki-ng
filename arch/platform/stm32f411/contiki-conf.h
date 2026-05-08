@@ -5,9 +5,19 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+
+
+
+#include "stm32f411-board-def.h"
+
+
+
+
+#include "stm32f411-conf.h"
+
+
+
 typedef unsigned short uip_stats_t;
 
-
-#define CLOCK_CONF_SECOND 128
 
 #endif

@@ -61,24 +61,6 @@ void rtc_wute_init(void){
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void rtc_init(void){
 
 
@@ -136,10 +118,8 @@ void rtc_init(void){
 
 void RTC_WKUP_IRQHandler(void){
     if (RTC->ISR & RTC_ISR_WUTF) {  
-        ticks++;
         RTC->ISR &= ~(RTC_ISR_WUTF);
         EXTI->PR |= EXTI_22;
-
 		clock_update();
     }
 
@@ -172,16 +152,14 @@ void clock_update(void)
   }
 }
 
-unsigned long
-clock_seconds(void)
+unsigned long clock_seconds(void)
 {
-  return (unsigned long)ticks / TICKS;
+  return (unsigned long)ticks / (TICKS);
 }
 
 
 
-void
-clock_wait(clock_time_t i)
+void clock_wait(clock_time_t i)
 {
   clock_time_t start;
   start = clock_time();
@@ -203,8 +181,7 @@ clock_delay_usec(uint16_t dt)
 
 
 
-void
-clock_delay(unsigned int i)
+void clock_delay(unsigned int i)
 {
   clock_delay_usec(i);
 }

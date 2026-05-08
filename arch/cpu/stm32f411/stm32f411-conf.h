@@ -1,0 +1,7 @@
+#ifndef STM32_CPU_CONF__
+#define STM32_CPU_CONF__
+
+#define RTIMER_ARCH_SECOND 62500
+#define CLOCK_CONF_SECOND 128
+
+#endif
