@@ -39,7 +39,14 @@
 
 #include "contiki.h"
 
-#include <stdio.h> /* For printf() */
+#include "sys/log.h"
+#include "sys/rtimer.h" // Ensure rtimer is included
+#include "stm32f411xe.h"
+
+
+
+#define LOG_MODULE "App"
+#define LOG_LEVEL LOG_LEVEL_INFO
 /*---------------------------------------------------------------------------*/
 PROCESS(hello_world_process, "Hello world process");
 AUTOSTART_PROCESSES(&hello_world_process);
@@ -51,10 +58,10 @@ PROCESS_THREAD(hello_world_process, ev, data)
   PROCESS_BEGIN();
 
   /* Setup a periodic timer that expires after 10 seconds. */
-  etimer_set(&timer, CLOCK_SECOND * 10);
+  etimer_set(&timer, CLOCK_SECOND * 1);
 
   while(1) {
-    printf("Hello, world\n");
+    LOG_INFO("Hello, world\n\r");
 
     /* Wait for the periodic timer to expire and then restart the timer. */
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
