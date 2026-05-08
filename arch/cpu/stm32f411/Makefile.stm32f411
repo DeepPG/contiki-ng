@@ -1,7 +1,7 @@
 CONTIKI_CPU = $(CONTIKI)/arch/cpu/stm32f411
 
 CONTIKI_CPU_DIRS += . startup dev
-CONTIKI_CPU_SOURCEFILES += gpio.c clock.c rtimer-arch.c uart0.c dbg.c gpio-hal-arch.c
+CONTIKI_CPU_SOURCEFILES += clock.c rtimer-arch.c uart0.c dbg.c gpio-hal-arch.c
 CONTIKI_CPU_SOURCEFILES += stm32f411_startup.c
 
 CONTIKI_SOURCEFILES += $(CONTIKI_CPU_SOURCEFILES)
