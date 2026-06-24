@@ -2,6 +2,6 @@
 #define RP2040_CPU_CONF__
 
 #define RTIMER_ARCH_SECOND 62500
-#define CLOCK_CONF_SECOND 10000
+#define CLOCK_CONF_SECOND 1
 
 #endif
