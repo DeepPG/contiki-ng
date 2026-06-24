@@ -70,9 +70,9 @@ random_init(void)
 #endif /* LINKADDR_SIZE < 8 */
     {
       memcpy(&seed, linkaddr_node_addr.u8, sizeof(linkaddr_node_addr.u8));
-      LOG_DBG("Using %zu-byte linkaddr as seed: 0x%" PRIx64 "\n",
-              (size_t)LINKADDR_SIZE,
-              seed);
+      // LOG_DBG("Using %zu-byte linkaddr as seed: 0x%" PRIx64 "\n",
+      //         (size_t)LINKADDR_SIZE,
+      //         seed);
     }
   }
   RANDOM_PRNG.seed(seed);

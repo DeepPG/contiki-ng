@@ -12,6 +12,9 @@
 *.ihex
 *.pyc
 *~
+*.sh
+.gitignore
+random.c
 build/*
 Makefile.target
 Makefile.*.defines
@@ -44,3 +47,5 @@ COOJA.testlog
 summary
 tests/18-coap-lwm2m/Californium.properties
 tests/18-coap-lwm2m/leshan-server-demo*.jar
+tools/
+arch/cpu/rp2040/lib/
