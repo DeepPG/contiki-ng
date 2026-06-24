@@ -3,37 +3,50 @@
 #include "pico/multicore.h"
 
 
-#include "sys/log.h"
 
-#define LOG_MODULE "App"
-#define LOG_LEVEL LOG_LEVEL_INFO 
 
+extern void core1_entry(void);
 
 
 
 
 
-
-int main(void) {
-
-    
+void platform_init_stage_one(void)
+{
     clock_init();
+
+}
+
+
+
+
+
+
+
+
+
+void platform_init_stage_two(void)
+{
+
     uart0_init();
+    multicore_launch_core1(core1_entry);
 
-    
+}
 
 
+
+
+
+
+void platform_init_stage_three(void)
+{
     process_init();
 
-    
+
     process_start(&etimer_process, NULL);
     autostart_start(autostart_processes);
 
+    
 
-    while(1) {
 
-        process_run(); 
-    }
-
-    return 0;
 }

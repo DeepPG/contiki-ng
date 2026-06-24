@@ -11,8 +11,6 @@
 
 
 
-extern void core1_entry(void);
-
 
 
 
@@ -29,12 +27,8 @@ PROCESS_THREAD(my_app_process, ev, data)
 {
     PROCESS_BEGIN();  
 
-    multicore_launch_core1(core1_entry);
 
-
-
-
-    etimer_set(&tt, 1);
+    etimer_set(&tt, (100) * 1);
 
     while(1) {
 

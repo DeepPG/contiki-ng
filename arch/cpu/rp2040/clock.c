@@ -13,7 +13,7 @@
 static volatile uint32_t ticks;
 void clock_update(void);
 
-#define TICKS 10000
+#define TICKS 1000
 
 
 
@@ -51,7 +51,7 @@ clock_init(void)
     // set_sys_clock_hz(62500 ,true); // same thing here 
     // set_sys_clock_48mhz();
     static struct repeating_timer timer;
-    add_repeating_timer_ms(-1000, clock_irq, NULL, &timer); // 10khz
+    add_repeating_timer_ms(-1, clock_irq, NULL, &timer); // 10khz
 }
 
 
