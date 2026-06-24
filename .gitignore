@@ -13,6 +13,8 @@
 *.pyc
 *~
 *.sh
+.gitignore
+random.c
 build/*
 Makefile.target
 Makefile.*.defines
