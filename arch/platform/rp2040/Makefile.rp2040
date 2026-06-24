@@ -1,0 +1,8 @@
+CPU = rp2040
+
+CONTIKI_TARGET_DIRS += .
+CONTIKI_TARGET_SOURCEFILES += platform.c board-leds.c
+
+PROJECT_SOURCEFILES += platform.c
+
+include $(CONTIKI)/arch/cpu/$(CPU)/Makefile.$(CPU)

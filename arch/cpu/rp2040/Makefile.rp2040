@@ -1,0 +1,203 @@
+CONTIKI_CPU = $(CONTIKI)/arch/cpu/rp2040
+PICO_SDK = $(CONTIKI_CPU)/lib/pico-sdk/src
+CYW42_LIB = $(CONTIKI_CPU)/lib/pico-sdk/lib/cyw43-driver
+CONTIKI_CPU_DIRS += . startup lib conflict dev
+CONTIKI_CPU_SOURCEFILES += main.c startup.c boot.S dbg.c  pico-timer.c clock.c uart0.c
+
+
+CONTIKI_SOURCEFILES += $(CONTIKI_CPU_SOURCEFILES)
+
+CFLAGS += -DPICO_RP2040 -g
+LDFLAGS += -Wl,-Map=output2.map
+
+
+
+
+
+LDSCRIPT = $(CONTIKI)/arch/cpu/rp2040/ld/linker.ld
+
+
+
+
+
+FUNCTION_WRAPPER = -Wl,--wrap=__aeabi_idiv \
+        -Wl,--wrap=__aeabi_idivmod \
+        -Wl,--wrap=__aeabi_ldivmod \
+        -Wl,--wrap=__aeabi_uidiv \
+        -Wl,--wrap=__aeabi_uidivmod \
+        -Wl,--wrap=__aeabi_uldivmod \
+        -Wl,--wrap=vsnprintf \
+        -Wl,--wrap=__clzsi2 \
+        -Wl,--wrap=__clzdi2 \
+        -Wl,--wrap=__ctzsi2 \
+        -Wl,--wrap=__popcountsi2 \
+        -Wl,--wrap=__popcountdi2 \
+        -Wl,--wrap=__clz \
+        -Wl,--wrap=__clzl \
+        -Wl,--wrap=__clzll \
+
+LDFLAGS += $(FUNCTION_WRAPPER) 
+
+
+
+RP2040_SRC_FILES += $(PICO_SDK)/rp2_common/hardware_gpio/gpio.c
+RP2040_SRC_FILES += $(PICO_SDK)/common/hardware_claim/claim.c
+RP2040_SRC_FILES += $(PICO_SDK)/rp2_common/hardware_irq/irq.c
+RP2040_SRC_FILES += $(PICO_SDK)/rp2_common/pico_bootrom/bootrom.c
+RP2040_SRC_FILES += ${PICO_SDK}/rp2_common/pico_clib_interface/newlib_interface.c # declare it if you want
+RP2040_SRC_FILES += ${PICO_SDK}/rp2_common/pico_runtime/runtime.c
+RP2040_SRC_FILES += ${PICO_SDK}/rp2_common/hardware_timer/timer.c
+RP2040_SRC_FILES += ${PICO_SDK}/rp2_common/pico_runtime_init/runtime_init.c # always link
+RP2040_SRC_FILES += ${PICO_SDK}/rp2_common/hardware_sync_spin_lock/sync_spin_lock.c
+RP2040_SRC_FILES += ${PICO_SDK}/rp2_common/pico_runtime_init/runtime_init_clocks.c
+RP2040_SRC_FILES += ${PICO_SDK}/rp2_common/hardware_clocks/clocks.c
+RP2040_SRC_FILES += ${PICO_SDK}/rp2_common/hardware_pll/pll.c
+RP2040_SRC_FILES += ${PICO_SDK}/rp2_common/hardware_ticks/ticks.c
+RP2040_SRC_FILES += ${PICO_SDK}/rp2_common/hardware_xosc/xosc.c # crystal ocsilator
+RP2040_SRC_FILES += $(PICO_SDK)/rp2_common/hardware_uart/uart.c # uart
+RP2040_SRC_FILES += $(PICO_SDK)/rp2_common/hardware_rtc/rtc.c # rtc
+RP2040_SRC_FILES += $(PICO_SDK)/common/pico_time/time.c
+RP2040_SRC_FILES += $(PICO_SDK)/common/pico_sync/lock_core.c # some of prevent locking function? related on spin lock and cpus, learn about it
+RP2040_SRC_FILES += $(PICO_SDK)/rp2_common/hardware_sync/sync.c
+RP2040_SRC_FILES += $(PICO_SDK)/rp2_common/pico_multicore/multicore.c
+RP2040_SRC_FILES += $(PICO_SDK)/rp2_common/pico_unique_id/unique_id.c
+RP2040_SRC_FILES += $(PICO_SDK)/rp2_common/pico_async_context/async_context_poll.c
+RP2040_SRC_FILES += $(PICO_SDK)/common/pico_sync/include/pico/sem.c
+RP2040_SRC_FILES += $(PICO_SDK)/rp2_common/pico_async_context/async_context_base.c
+RP2040_SRC_FILES += $(PICO_SDK)/rp2_common/hardware_pio/pio.c
+RP2040_SRC_FILES += $(PICO_SDK)/rp2_common/hardware_dma/dma.c
+RP2040_SRC_FILES += $(PICO_SDK)/rp2_common/hardware_flash/flash.c
+
+
+# cyw43
+
+RP2040_SRC_FILES += $(PICO_SDK)/rp2_common/pico_cyw43_arch/cyw43_arch.c
+RP2040_SRC_FILES += $(PICO_SDK)/rp2_common/pico_cyw43_arch/cyw43_arch_poll.c
+RP2040_SRC_FILES += $(PICO_SDK)/rp2_common/pico_cyw43_driver/cyw43_driver.c
+RP2040_SRC_FILES += $(PICO_SDK)/rp2_common/pico_cyw43_driver/cyw43_bus_pio_spi.c
+
+
+
+RP2040_SRC_FILES += $(CYW42_LIB)/src/cyw43_stats.c
+RP2040_SRC_FILES += $(CYW42_LIB)/src/cyw43_sdio.c
+RP2040_SRC_FILES += $(CYW42_LIB)/src/cyw43_lwip.c
+RP2040_SRC_FILES += $(CYW42_LIB)/src/cyw43_ll.c
+RP2040_SRC_FILES += $(CYW42_LIB)/src/cyw43_ctrl.c
+RP2040_SRC_FILES += $(CYW42_LIB)/src/cyw43_bthci_uart.c
+
+
+
+
+
+
+
+
+RP2040_SRC_FILES += ${PICO_SDK}/rp2_common/hardware_irq/irq_handler_chain.S
+RP2040_SRC_FILES += ${PICO_SDK}/rp2_common/pico_divider/divider_hardware.S # only work for rp2040 and most compiled with
+#RP2040_SRC_FILES += ${PICO_SDK}/rp2_common/pico_printf/printf_none.S # always link, this file contain dummy weak functions I think
+RP2040_SRC_FILES += ${PICO_SDK}/rp2_common/pico_bit_ops/bit_ops_aeabi.S # always link
+
+
+
+CONTIKI_CPU_SOURCEFILES += $(notdir $(RP2040_SRC_FILES))
+
+
+
+EXTERNALDIRS += $(PICO_SDK)/rp2_common/hardware_gpio/
+EXTERNALDIRS += $(PICO_SDK)/common/hardware_claim/
+EXTERNALDIRS += $(PICO_SDK)/rp2_common/hardware_irq/
+EXTERNALDIRS += $(PICO_SDK)/rp2_common/pico_bootrom/
+EXTERNALDIRS += ${PICO_SDK}/rp2_common/pico_runtime/
+EXTERNALDIRS += ${PICO_SDK}/rp2_common/pico_clib_interface/
+EXTERNALDIRS += ${PICO_SDK}/rp2_common/pico_runtime/
+EXTERNALDIRS += ${PICO_SDK}/rp2_common/hardware_timer/
+EXTERNALDIRS += ${PICO_SDK}/rp2_common/pico_runtime_init/
+EXTERNALDIRS += ${PICO_SDK}/rp2_common/hardware_sync_spin_lock/
+EXTERNALDIRS += ${PICO_SDK}/rp2_common/pico_runtime_init/
+EXTERNALDIRS += ${PICO_SDK}/rp2_common/hardware_clocks/
+EXTERNALDIRS += ${PICO_SDK}/rp2_common/hardware_pll/
+EXTERNALDIRS += ${PICO_SDK}/rp2_common/hardware_ticks/
+EXTERNALDIRS += ${PICO_SDK}/rp2_common/hardware_xosc/
+EXTERNALDIRS += $(PICO_SDK)/rp2_common/hardware_uart/
+EXTERNALDIRS += $(PICO_SDK)/rp2_common/hardware_rtc/
+EXTERNALDIRS += $(PICO_SDK)/rp2_common/hardware_sync/
+EXTERNALDIRS += $(PICO_SDK)/rp2_common/pico_multicore/
+EXTERNALDIRS += $(PICO_SDK)/rp2_common/pico_unique_id/
+EXTERNALDIRS += $(PICO_SDK)/rp2_common/pico_async_context/
+EXTERNALDIRS += $(PICO_SDK)/common/pico_sync/
+EXTERNALDIRS += $(PICO_SDK)/common/pico_time/
+EXTERNALDIRS += $(PICO_SDK)/common/pico_sync/include/pico/
+EXTERNALDIRS += $(PICO_SDK)/rp2_common/pico_async_context/
+EXTERNALDIRS += $(PICO_SDK)/rp2_common/hardware_pio/
+EXTERNALDIRS += $(PICO_SDK)/rp2_common/hardware_dma/
+EXTERNALDIRS += $(PICO_SDK)/rp2_common/hardware_flash/
+
+
+
+
+
+
+
+
+
+EXTERNALDIRS += $(PICO_SDK)/rp2_common/hardware_irq/
+EXTERNALDIRS += $(PICO_SDK)/rp2_common/pico_divider/ # only work for rp2040 and most compiled with
+EXTERNALDIRS += ${PICO_SDK}/rp2_common/pico_bit_ops/ # always link
+#EXTERNALDIRS += ${PICO_SDK}/rp2_common/pico_printf/
+
+
+
+# cyw43
+EXTERNALDIRS += ${PICO_SDK}/rp2_common/pico_cyw43_arch/
+EXTERNALDIRS += $(PICO_SDK)/rp2_common/pico_cyw43_driver/
+
+
+EXTERNALDIRS += += $(CYW42_LIB)/src/
+
+
+
+
+
+
+
+DIRS += $(shell find $(PICO_SDK)/rp2_common/ -type d -iname "include")
+DIRS += $(shell ls -d $(PICO_SDK)/rp2040/*/include/)
+DIRS += $(shell ls -d $(PICO_SDK)/common/*/include/)
+INCLUDE_PICO = $(addprefix -I, $(DIRS))
+CFLAGS += $(INCLUDE_PICO)
+CFLAGS += -I$(CONTIKI_CPU)/lib/pico-sdk/bazel/include/
+CFLAGS += -I$(CONTIKI_CPU)/lib/pico-sdk/tools/pioasm/
+CFLAGS += -I$(CONTIKI_CPU)/lib/pico-sdk/src/boards/include/
+CFLAGS += -I$(PICO_SDK)/rp2_common/pico_runtime/include
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# cyw43 Library including
+
+
+CFLAGS += -I$(CYW42_LIB)/src/
+CFLAGS += -I$(CYW42_LIB)/firmware/
+
+CFLAGS += -DCYW43_LWIP=0 -DPICO_CYW43_ARCH_POLL=1
+
+
+
+
+
+include $(CONTIKI)/arch/cpu/arm/cortex-m/cm0plus/Makefile.cm0plus
