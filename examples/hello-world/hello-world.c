@@ -41,6 +41,11 @@
 
 #include "sys/log.h"
 #include "sys/rtimer.h" // Ensure rtimer is included
+<<<<<<< HEAD
+=======
+#include "stm32f411xe.h"
+
+>>>>>>> d9ccdc4213239d394d3118d7e7f173ff56630bb4
 
 
 #define LOG_MODULE "App"
