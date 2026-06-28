@@ -10,7 +10,6 @@
 
 
 
-// Declare the initial stack pointer, the value will be provided by the linker
 extern uint32_t __StackLimit;
 extern uint32_t _sdata;
 extern uint32_t _sidata;
@@ -20,18 +19,15 @@ extern uint32_t _ebss;
 
 
 
-// Declare interrupt functions defined in this file
 void defaultHandler();
 void resetHandler();
 
-// Declare all other core interrupt functions as weak and alias of the defaultHandler
 void nmiHandler         () __attribute__((weak, alias("defaultHandler")));
 void hardFaultHandler   () __attribute__((weak, alias("defaultHandler")));
 void svCallHandler      () __attribute__((weak, alias("defaultHandler")));
 void pendSvHandler      () __attribute__((weak, alias("defaultHandler")));
 void sysTickHandler     () __attribute__((weak, alias("defaultHandler")));
 
-// Declare all other external interrupt functions as weak and alias of the defaultHandler
 void timerIrq0          () __attribute__((weak, alias("defaultHandler")));
 void timerIrq1          () __attribute__((weak, alias("defaultHandler")));
 void timerIrq2          () __attribute__((weak, alias("defaultHandler")));
@@ -59,60 +55,58 @@ void i2c0Irq            () __attribute__((weak, alias("defaultHandler")));
 void i2c1Irq            () __attribute__((weak, alias("defaultHandler")));
 void rtcIrq             () __attribute__((weak, alias("defaultHandler")));
 
-// Declare main function
 extern int main(void);
 
-// Vector table
 uint32_t __vectors[] __attribute__((section(".vectors"))) = 
 {
-    (uint32_t)&__StackLimit,   // Stack pointer
-    (uint32_t)&resetHandler,           // Reset Handler
-    (uint32_t)&nmiHandler,             // NMI
-    (uint32_t)&hardFaultHandler,       // HardFault
-    (uint32_t)0,                      // Reserved
-    (uint32_t)0,                      // Reserved
-    (uint32_t)0,                      // Reserved
-    (uint32_t)0,                      // Reserved
-    (uint32_t)0,                      // Reserved
-    (uint32_t)0,                      // Reserved
-    (uint32_t)0,                      // Reserved
-    (uint32_t)&svCallHandler,          // SVCall
-    (uint32_t)0,                      // Reserved
-    (uint32_t)0,                      // Reserved
-    (uint32_t)&pendSvHandler,          // PendSV
-    (uint32_t)&sysTickHandler,         // SysTick
-    (uint32_t)&timerIrq0,              // ExternalInterrupt[0]     = TIMER_IRQ_0
-    (uint32_t)&timerIrq1,              // ExternalInterrupt[1]     = TIMER_IRQ_1
-    (uint32_t)&timerIrq2,              // ExternalInterrupt[2]     = TIMER_IRQ_2
-    (uint32_t)&timerIrq3,              // ExternalInterrupt[3]     = TIMER_IRQ_3
-    (uint32_t)&pwmIrqWrap,             // ExternalInterrupt[4]     = PWM_IRQ_WRAP
-    (uint32_t)&usbctrlIrq,             // ExternalInterrupt[5]     = USBCTRL_IRQ
-    (uint32_t)&xipIrq,                 // ExternalInterrupt[6]     = XIP_IRQ
-    (uint32_t)&pio0Irq0,               // ExternalInterrupt[7]     = PIO0_IRQ_0
-    (uint32_t)&pio0Irq1,               // ExternalInterrupt[8]     = PIO0_IRQ_1
-    (uint32_t)&pio1Irq0,               // ExternalInterrupt[9]     = PIO1_IRQ_0
-    (uint32_t)&pio1Irq1,               // ExternalInterrupt[10]    = PIO1_IRQ_1
-    (uint32_t)&dmaIrq0,                // ExternalInterrupt[11]    = DMA_IRQ_0
-    (uint32_t)&dmaIrq1,                // ExternalInterrupt[12]    = DMA_IRQ_1
-    (uint32_t)&ioIrqBank0,             // ExternalInterrupt[13]    = IO_IRQ_BANK0
-    (uint32_t)&ioIrqQspi,              // ExternalInterrupt[14]    = IO_IRQ_QSPI
-    (uint32_t)&sioIrqProc0,            // ExternalInterrupt[15]    = SIO_IRQ_PROC0
-    (uint32_t)&sioIrqProc1,            // ExternalInterrupt[16]    = SIO_IRQ_PROC1
-    (uint32_t)&clocksIrq,              // ExternalInterrupt[17]    = CLOCKS_IRQ
-    (uint32_t)&spi0Irq,                // ExternalInterrupt[18]    = SPI0_IRQ
-    (uint32_t)&spi1Irq,                // ExternalInterrupt[19]    = SPI1_IRQ
-    (uint32_t)&uart0Irq,               // ExternalInterrupt[20]    = UART0_IRQ
-    (uint32_t)&uart1Irq,               // ExternalInterrupt[21]    = UART1_IRQ
-    (uint32_t)&adcIrqFifo,             // ExternalInterrupt[22]    = ADC_IRQ_FIFO
-    (uint32_t)&i2c0Irq,                // ExternalInterrupt[23]    = I2C0_IRQ
-    (uint32_t)&i2c1Irq,                // ExternalInterrupt[24]    = I2C1_IRQ
-    (uint32_t)&rtcIrq,                 // ExternalInterrupt[25]    = RTC_IRQ
-    (uint32_t)0,                      // ExternalInterrupt[26]    = Reserved
-    (uint32_t)0,                      // ExternalInterrupt[27]    = Reserved
-    (uint32_t)0,                      // ExternalInterrupt[28]    = Reserved
-    (uint32_t)0,                      // ExternalInterrupt[29]    = Reserved
-    (uint32_t)0,                      // ExternalInterrupt[30]    = Reserved
-    (uint32_t)0,                      // ExternalInterrupt[31]    = Reserved
+    (uint32_t)&__StackLimit,
+    (uint32_t)&resetHandler,
+    (uint32_t)&nmiHandler,
+    (uint32_t)&hardFaultHandler,
+    (uint32_t)0,
+    (uint32_t)0,
+    (uint32_t)0,
+    (uint32_t)0,
+    (uint32_t)0,
+    (uint32_t)0,
+    (uint32_t)0,
+    (uint32_t)&svCallHandler,
+    (uint32_t)0,
+    (uint32_t)0,
+    (uint32_t)&pendSvHandler,
+    (uint32_t)&sysTickHandler,
+    (uint32_t)&timerIrq0,
+    (uint32_t)&timerIrq1,
+    (uint32_t)&timerIrq2,
+    (uint32_t)&timerIrq3,
+    (uint32_t)&pwmIrqWrap,
+    (uint32_t)&usbctrlIrq,
+    (uint32_t)&xipIrq,
+    (uint32_t)&pio0Irq0,
+    (uint32_t)&pio0Irq1,
+    (uint32_t)&pio1Irq0,
+    (uint32_t)&pio1Irq1,
+    (uint32_t)&dmaIrq0,
+    (uint32_t)&dmaIrq1,
+    (uint32_t)&ioIrqBank0,
+    (uint32_t)&ioIrqQspi,
+    (uint32_t)&sioIrqProc0,
+    (uint32_t)&sioIrqProc1,
+    (uint32_t)&clocksIrq,
+    (uint32_t)&spi0Irq,
+    (uint32_t)&spi1Irq,
+    (uint32_t)&uart0Irq,
+    (uint32_t)&uart1Irq,
+    (uint32_t)&adcIrqFifo,
+    (uint32_t)&i2c0Irq,
+    (uint32_t)&i2c1Irq,
+    (uint32_t)&rtcIrq,
+    (uint32_t)0,
+    (uint32_t)0,
+    (uint32_t)0,
+    (uint32_t)0,
+    (uint32_t)0,
+    (uint32_t)0,
 };
 
 
@@ -147,8 +141,8 @@ void resetHandler()
 
 
 
-    main(); // Jump to main function
-    while(true); // Inf loop if we ever come back here
+    main();
+    while(true);
 }
 
 
@@ -178,75 +172,6 @@ void panic(const char *fmt, ...) __attribute__((weak, alias("defaultHandler")));
 */
 
 void __assert_func(const char *file, int line, const char *func, const char *failedexpr)  __attribute__((weak, alias("defaultHandler")));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- __attribute__ ((weak)) int printf(const char *fmt, ...){
-
-    return 1;
- }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
