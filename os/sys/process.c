@@ -47,10 +47,14 @@
 
 #include "contiki.h"
 #include "sys/process.h"
+#include "pico.h"
+  #include "pico/stdlib.h"
+
 
 #include "sys/log.h"
-#define LOG_MODULE "Process"
-#define LOG_LEVEL LOG_LEVEL_SYS
+#define LOG_MODULE "Processing"
+#define LOG_LEVEL LOG_LEVEL_INFO
+
 
 /*
  * The process_num_events_t type is an uint8_t. It must be able to store
@@ -78,10 +82,18 @@ void PROCESS_POLL_REQUESTED(void);
 /*
  * Pointer to the currently running process structure.
  */
-struct process *process_list;
-struct process *process_current;
+struct process *process_list[2];
+struct process *process_current[2];
 
-static process_event_t lastevent;
+static process_event_t lastevent[2];
+
+// #define process_list[core_id] (process_list[core_id]_[get_core_num()])
+// #define process_current (process_current_[get_core_num()])
+
+// #define lastevent (lastevent_[get_core_num])
+
+
+
 
 /*
  * Structure used for keeping the queue of active events.
@@ -92,47 +104,53 @@ struct event_data {
   process_event_t ev;
 };
 
-static process_num_events_t nevents, fevent;
-static struct event_data events[PROCESS_CONF_NUMEVENTS];
+static process_num_events_t nevents[2], fevent[2];
+static struct event_data events[2][PROCESS_CONF_NUMEVENTS];
 
 #if PROCESS_CONF_STATS
 process_num_events_t process_maxevents;
 #endif
 
-static volatile bool poll_requested;
+static volatile bool poll_requested[2];
 
 #define PROCESS_STATE_NONE        0
 #define PROCESS_STATE_RUNNING     1
 #define PROCESS_STATE_CALLED      2
+
 
 static void call_process(struct process *p, process_event_t ev, process_data_t data);
 /*---------------------------------------------------------------------------*/
 process_event_t
 process_alloc_event(void)
 {
-  if(lastevent == (process_event_t)~0U) {
+  if(lastevent[core_id] == (process_event_t)~0U) {
     LOG_WARN("Cannot allocate another event number\n");
     return PROCESS_EVENT_NONE;
   }
-  return lastevent++;
+  return lastevent[core_id]++;
 }
 /*---------------------------------------------------------------------------*/
 void
 process_start(struct process *p, process_data_t data)
 {
+
   struct process *q;
+  int core_id = get_core_num();
+
+  p->core = core_id;
+  
 
   /* First make sure that we don't try to start a process that is
      already running. */
-  for(q = process_list; q != p && q != NULL; q = q->next);
+  for(q = process_list[core_id]; q != p && q != NULL; q = q->next);
 
   /* If we found the process on the process list, we bail out. */
   if(q == p) {
     return;
   }
   /* Put on the procs list.*/
-  p->next = process_list;
-  process_list = p;
+  p->next = process_list[core_id];
+  process_list[core_id] = p;
   p->state = PROCESS_STATE_RUNNING;
   PT_INIT(&p->pt);
 
@@ -146,13 +164,15 @@ static void
 exit_process(struct process *p, const struct process *fromprocess)
 {
   register struct process *q;
-  struct process *old_current = process_current;
+  uint8_t core_id = get_core_num();
+
+  struct process *old_current = process_current[core_id];
 
   LOG_DBG("exit_process '%s'\n", PROCESS_NAME_STRING(p));
 
   /* Make sure the process is in the process list before we try to
      exit it. */
-  for(q = process_list; q != p && q != NULL; q = q->next);
+  for(q = process_list[core_id]; q != p && q != NULL; q = q->next);
   if(q == NULL) {
     return;
   }
@@ -162,15 +182,15 @@ exit_process(struct process *p, const struct process *fromprocess)
 
     if(p->thread != NULL && p != fromprocess) {
       /* Post the exit event to the process that is about to exit. */
-      process_current = p;
+      process_current[core_id] = p;
       p->thread(&p->pt, PROCESS_EVENT_EXIT, NULL);
     }
   }
 
-  if(p == process_list) {
-    process_list = process_list->next;
+  if(p == process_list[core_id]) {
+    process_list[core_id] = process_list[core_id]->next;
   } else {
-    for(q = process_list; q != NULL; q = q->next) {
+    for(q = process_list[core_id]; q != NULL; q = q->next) {
       if(q->next == p) {
         q->next = p->next;
         break;
@@ -187,17 +207,22 @@ exit_process(struct process *p, const struct process *fromprocess)
      * this process is about to exit. This will allow services to
      * deallocate state associated with this process.
      */
-    for(q = process_list; q != NULL; q = q->next) {
+    for(q = process_list[core_id]; q != NULL; q = q->next) {
         call_process(q, PROCESS_EVENT_EXITED, (process_data_t)p);
     }
   }
 
-  process_current = old_current;
+  process_current[core_id] = old_current;
 }
 /*---------------------------------------------------------------------------*/
 static void
 call_process(struct process *p, process_event_t ev, process_data_t data)
 {
+  uint8_t core_id = get_core_num();
+
+
+
+
   if(p->state == PROCESS_STATE_CALLED) {
     LOG_DBG("process '%s' called again with event %d\n",
             PROCESS_NAME_STRING(p), ev);
@@ -207,7 +232,7 @@ call_process(struct process *p, process_event_t ev, process_data_t data)
      p->thread != NULL) {
     LOG_DBG("calling process '%s' with event %d\n",
             PROCESS_NAME_STRING(p), ev);
-    process_current = p;
+    process_current[core_id] = p;
     p->state = PROCESS_STATE_CALLED;
     int ret = p->thread(&p->pt, ev, data);
     if(ret == PT_EXITED || ret == PT_ENDED || ev == PROCESS_EVENT_EXIT) {
@@ -227,7 +252,8 @@ process_exit(struct process *p)
 void
 process_init(void)
 {
-  lastevent = PROCESS_EVENT_MAX;
+  uint8_t core_id = get_core_num();
+  lastevent[core_id] = PROCESS_EVENT_MAX;
 }
 /*---------------------------------------------------------------------------*/
 /*
@@ -237,9 +263,11 @@ process_init(void)
 static void
 do_poll(void)
 {
-  poll_requested = false;
+  uint8_t core_id = get_core_num();
+
+  poll_requested[core_id] = false;
   /* Call the processes that needs to be polled. */
-  for(struct process *p = process_list; p != NULL; p = p->next) {
+  for(struct process *p = process_list[core_id]; p != NULL; p = p->next) {
     if(p->needspoll) {
       p->state = PROCESS_STATE_RUNNING;
       p->needspoll = false;
@@ -256,32 +284,34 @@ do_poll(void)
 static void
 do_event(void)
 {
-  /*
+  /*q
    * If there are any events in the queue, take the first one and walk
    * through the list of processes to see if the event should be
    * delivered to any of them. If so, we call the event handler
    * function for the process. We only process one event at a time and
    * call the poll handlers inbetween.
    */
-  if(nevents > 0) {
+  uint8_t core_id = get_core_num();
+
+  if(nevents[core_id] > 0) {
 
     /* There are events that we should deliver. */
-    process_event_t ev = events[fevent].ev;
-    process_data_t data = events[fevent].data;
-    struct process *receiver = events[fevent].p;
+    process_event_t ev = events[core_id][fevent[core_id]].ev;
+    process_data_t data = events[core_id][fevent[core_id]].data;
+    struct process *receiver = events[core_id][fevent[core_id]].p;
 
     /* Since we have seen the new event, we move pointer upwards
        and decrease the number of events. */
-    fevent = (fevent + 1) % PROCESS_CONF_NUMEVENTS;
-    --nevents;
+    fevent[core_id] = (fevent[core_id] + 1) % PROCESS_CONF_NUMEVENTS;
+    --nevents[core_id];
 
     /* If this is a broadcast event, we deliver it to all events, in
        order of their priority. */
     if(receiver == PROCESS_BROADCAST) {
-      for(struct process *p = process_list; p != NULL; p = p->next) {
+      for(struct process *p = process_list[core_id]; p != NULL; p = p->next) {
         /* If we have been requested to poll a process, we do this in
            between processing the broadcast event. */
-        if(poll_requested) {
+        if(poll_requested[core_id]) {
           do_poll();
         }
         call_process(p, ev, data);
@@ -304,49 +334,57 @@ do_event(void)
 process_num_events_t
 process_run(void)
 {
+
+  uint8_t core_id = get_core_num();
+  
   /* Process poll events. */
-  if(poll_requested) {
+  if(poll_requested[core_id]) {
     do_poll();
   }
+
 
   /* Process one event from the queue */
   do_event();
 
-  return nevents + poll_requested;
+
+  return nevents[core_id] + poll_requested[core_id];
 }
 /*---------------------------------------------------------------------------*/
 process_num_events_t
 process_nevents(void)
 {
-  return nevents + poll_requested;
+  return nevents[core_id] + poll_requested[core_id];
 }
 /*---------------------------------------------------------------------------*/
 int
 process_post(struct process *p, process_event_t ev, process_data_t data)
 {
-  if(nevents == PROCESS_CONF_NUMEVENTS) {
+  uint8_t core_id = p->core;
+
+
+  if(nevents[core_id] == PROCESS_CONF_NUMEVENTS) {
     LOG_WARN("Cannot post event %d to %s from %s because the queue is full\n",
              ev,
              p == PROCESS_BROADCAST ? "<broadcast>" : PROCESS_NAME_STRING(p),
-             PROCESS_NAME_STRING(process_current));
+             PROCESS_NAME_STRING(process_current[core_id]));
     return PROCESS_ERR_FULL;
   }
 
   LOG_DBG("Process '%s' posts event %d to process '%s', nevents %d\n",
           PROCESS_NAME_STRING(PROCESS_CURRENT()),
           ev, p == PROCESS_BROADCAST ? "<broadcast>" : PROCESS_NAME_STRING(p),
-          nevents);
+          nevents[core_id]);
 
   process_num_events_t snum =
-    (process_num_events_t)(fevent + nevents) % PROCESS_CONF_NUMEVENTS;
-  events[snum].ev = ev;
-  events[snum].data = data;
-  events[snum].p = p;
-  ++nevents;
+    (process_num_events_t)(fevent[core_id] + nevents[core_id]) % PROCESS_CONF_NUMEVENTS;
+  events[core_id][snum].ev = ev;
+  events[core_id][snum].data = data;
+  events[core_id][snum].p = p;
+  ++nevents[core_id];
 
 #if PROCESS_CONF_STATS
-  if(nevents > process_maxevents) {
-    process_maxevents = nevents;
+  if(nevents[core_id] > process_maxevents) {
+    process_maxevents = nevents[core_id];
   }
 #endif /* PROCESS_CONF_STATS */
 
@@ -356,19 +394,23 @@ process_post(struct process *p, process_event_t ev, process_data_t data)
 void
 process_post_synch(struct process *p, process_event_t ev, process_data_t data)
 {
-  struct process *caller = process_current;
+  uint8_t core_id = get_core_num();
+
+  struct process *caller = process_current[core_id];
 
   call_process(p, ev, data);
-  process_current = caller;
+  process_current[core_id] = caller;
 }
 /*---------------------------------------------------------------------------*/
 void
 process_poll(struct process *p)
 {
+  uint8_t core_id = get_core_num();
+
   if(p != NULL &&
      (p->state == PROCESS_STATE_RUNNING || p->state == PROCESS_STATE_CALLED)) {
     p->needspoll = true;
-    poll_requested = true;
+    poll_requested[core_id] = true;
     PROCESS_POLL_REQUESTED();
   }
 }

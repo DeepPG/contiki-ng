@@ -257,6 +257,8 @@ clock_time_t etimer_next_expiration_time(void);
 /** @} */
 
 PROCESS_NAME(etimer_process);
+PROCESS_NAME(etimer_process_core1);
+
 #endif /* ETIMER_H_ */
 /** @} */
 /** @} */

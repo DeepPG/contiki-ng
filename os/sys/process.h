@@ -54,6 +54,7 @@
 #define PROCESS_H_
 
 #include <stdbool.h>
+#include "platform.h"
 
 #include "sys/pt.h"
 #include "sys/cc.h"
@@ -104,6 +105,10 @@ typedef uint8_t       process_num_events_t;
 #define PROCESS_EVENT_MAX             0x8b
 
 #define PROCESS_BROADCAST NULL
+
+extern uint8_t core_id;
+extern int rp2040_get_core_id(void);
+
 
 /**
  * \name Process protothread functions
@@ -326,6 +331,7 @@ struct process {
   struct pt pt;
   uint8_t state;
   bool needspoll;
+  uint8_t core;
 };
 
 /**
@@ -402,8 +408,8 @@ void process_exit(struct process *p);
  *
  * \hideinitializer
  */
-#define PROCESS_CURRENT() process_current
-extern struct process *process_current;
+#define PROCESS_CURRENT() process_current[rp2040_get_core_id()]
+extern struct process *process_current[2];
 
 /**
  * Switch context to another process
@@ -428,7 +434,7 @@ extern struct process *process_current;
  */
 #define PROCESS_CONTEXT_BEGIN(p) {\
 struct process *tmp_current = PROCESS_CURRENT();\
-process_current = p
+process_current[rp2040_get_core_id()] = p
 
 /**
  * End a context switch
@@ -440,7 +446,7 @@ process_current = p
  *
  * \sa PROCESS_CONTEXT_START()
  */
-#define PROCESS_CONTEXT_END(p) process_current = tmp_current; }
+#define PROCESS_CONTEXT_END(p) process_current[rp2040_get_core_id()] = tmp_current; }
 
 /**
  * \brief      Allocate a global event number.
@@ -530,9 +536,9 @@ process_num_events_t process_nevents(void);
 
 /** @} */
 
-extern struct process *process_list;
+extern struct process *process_list[2];
 
-#define PROCESS_LIST() process_list
+#define PROCESS_LIST() process_list[rp2040_get_core_id()]
 
 #endif /* PROCESS_H_ */
 

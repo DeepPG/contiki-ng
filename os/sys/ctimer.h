@@ -149,7 +149,7 @@ void ctimer_set_with_process(struct ctimer *c, clock_time_t t,
 static inline void
 ctimer_set(struct ctimer *c, clock_time_t t, void (*f)(void *), void *ptr)
 {
-  ctimer_set_with_process(c, t, f, ptr, PROCESS_CURRENT());
+    ctimer_set_with_process(c, t, f, ptr, PROCESS_CURRENT());
 }
 
 /**
